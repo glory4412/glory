@@ -91,14 +91,49 @@
                 </div>
             </fieldset>
 
-            <div class="form-group">
-                <label for="signature">Signature of Account Holder:</label>
-                <input type="text" id="signature" name="signature" placeholder="Enter your full name as signature" required>
-                <small>By submitting this form, you acknowledge the information provided is accurate.</small>
+            <div class="form-group signature-section">
+                <label>Digital Signature:</label>
+                <div class="signature-pad-container">
+                    <canvas id="signaturePad" width="600" height="200"></canvas>
+                    <input type="hidden" id="signature" name="signature" required>
+                </div>
+                <div class="signature-controls">
+                    <button type="button" id="clearSignature" class="btn-secondary">Clear Signature</button>
+                </div>
+                <small>Please sign using your mouse or touch screen. By signing, you acknowledge the information provided is accurate.</small>
             </div>
 
-            <button type="submit">Submit Information</button>
+            <button type="submit" id="submitBtn" disabled>Submit Information</button>
         </form>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('signaturePad');
+            const signaturePad = new SignaturePad(canvas, {
+                backgroundColor: 'rgb(255, 255, 255)',
+                penColor: 'rgb(0, 0, 0)'
+            });
+            const clearButton = document.getElementById('clearSignature');
+            const submitButton = document.getElementById('submitBtn');
+            const signatureInput = document.getElementById('signature');
+
+            function updateSubmitButton() {
+                submitButton.disabled = signaturePad.isEmpty();
+            }
+
+            signaturePad.addEventListener('endStroke', () => {
+                signatureInput.value = signaturePad.toDataURL();
+                updateSubmitButton();
+            });
+
+            clearButton.addEventListener('click', () => {
+                signaturePad.clear();
+                signatureInput.value = '';
+                updateSubmitButton();
+            });
+        });
+    </script>
 </body>
 </html>

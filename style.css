@@ -81,6 +81,46 @@ button[type="submit"]:hover {
     background-color: #0056b3;
 }
 
+button[type="submit"]:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.signature-section {
+    margin-top: 30px;
+}
+
+.signature-pad-container {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 10px 0;
+    background: #fff;
+}
+
+#signaturePad {
+    width: 100%;
+    height: 200px;
+    touch-action: none;
+}
+
+.signature-controls {
+    margin: 10px 0;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
 small {
     display: block;
     margin-top: 5px;
