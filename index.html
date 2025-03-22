@@ -8,6 +8,11 @@
 </head>
 <body>
     <div class="container">
+        <?php if(isset($_GET['error'])): ?>
+            <div class="error-message">
+                Error: <?php echo htmlspecialchars($_GET['error']); ?>
+            </div>
+        <?php endif; ?>
         <h1>Next of Kin Information Form</h1>
         <form action="process_form.php" method="POST">
             <fieldset>

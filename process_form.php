@@ -38,12 +38,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ));
 
     if ($result) {
-        echo "<h2>Registration Successful!</h2>";
-        echo "<p>Your information has been successfully submitted.</p>";
+        header("Location: success.html");
+        exit();
     } else {
-        echo "<h2>Error!</h2>";
-        echo "<p>There was an error submitting your information. Please try again later.</p>";
-        echo "<p>Error details: " . pg_last_error($conn) . "</p>";
+        header("Location: index.html?error=" . urlencode(pg_last_error($conn)));
+        exit();
     }
 }
 
