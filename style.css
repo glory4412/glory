@@ -142,6 +142,23 @@ input[type="color"] {
     cursor: pointer;
 }
 
+
+.invalid {
+    border-color: #dc3545;
+    background-color: #fff8f8;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+input.invalid:focus, textarea.invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220,53,69,.25);
+}
+
 input[type="range"] {
     width: 100px;
 }

@@ -14,7 +14,7 @@
             </div>
         <?php endif; ?>
         <h1>Next of Kin Information Form</h1>
-        <form action="process_form.php" method="POST" onsubmit="return confirm('Are you sure you want to submit this information?');">
+        <form action="process_form.php" method="POST" id="nokForm" onsubmit="return validateForm(event);">
             <fieldset>
                 <legend>Account Holder Information</legend>
                 <div class="form-group">
@@ -185,3 +185,118 @@
 </html>
 </body>
 </html>
+
+<script>
+function validateForm(event) {
+    event.preventDefault();
+    const form = document.getElementById('nokForm');
+    let isValid = true;
+    let errorMessage = '';
+
+    // Account Holder Validation
+    const nameRegex = /^[a-zA-Z\s]{2,}$/;
+    if (!nameRegex.test(form.account_holder_name.value)) {
+        errorMessage += 'Invalid account holder name (only letters and spaces allowed)\n';
+        isValid = false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.account_holder_email.value)) {
+        errorMessage += 'Invalid email format\n';
+        isValid = false;
+    }
+
+    const phoneRegex = /^\+?[\d\s-]{10,}$/;
+    if (!phoneRegex.test(form.account_holder_phone.value)) {
+        errorMessage += 'Invalid phone number (minimum 10 digits)\n';
+        isValid = false;
+    }
+
+    // Date validation
+    const dob = new Date(form.account_holder_dob.value);
+    const today = new Date();
+    if (dob >= today) {
+        errorMessage += 'Date of birth must be in the past\n';
+        isValid = false;
+    }
+
+    // Next of Kin Validation
+    if (!nameRegex.test(form.nok_name.value)) {
+        errorMessage += 'Invalid next of kin name\n';
+        isValid = false;
+    }
+
+    if (form.nok_email.value && !emailRegex.test(form.nok_email.value)) {
+        errorMessage += 'Invalid next of kin email format\n';
+        isValid = false;
+    }
+
+    if (!phoneRegex.test(form.nok_phone.value)) {
+        errorMessage += 'Invalid next of kin phone number\n';
+        isValid = false;
+    }
+
+    if (form.nok_address.value.length < 10) {
+        errorMessage += 'Address is too short\n';
+        isValid = false;
+    }
+
+    // Bank Information Validation
+    if (form.bank_name.value.length < 2) {
+        errorMessage += 'Invalid bank name\n';
+        isValid = false;
+    }
+
+    const accountRegex = /^\d{5,17}$/;
+    if (!accountRegex.test(form.bank_account_number.value)) {
+        errorMessage += 'Invalid bank account number\n';
+        isValid = false;
+    }
+
+    if (form.routing_number.value && !/^\d{9}$/.test(form.routing_number.value)) {
+        errorMessage += 'Invalid routing number (should be 9 digits)\n';
+        isValid = false;
+    }
+
+    // User Credentials Validation
+    if (form.user_id.value.length < 5) {
+        errorMessage += 'User ID must be at least 5 characters long\n';
+        isValid = false;
+    }
+
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(form.password.value)) {
+        errorMessage += 'Password must be at least 8 characters with letters and numbers\n';
+        isValid = false;
+    }
+
+    // Signature Validation
+    if (!form.signature.value) {
+        errorMessage += 'Signature is required\n';
+        isValid = false;
+    }
+
+    if (!isValid) {
+        alert('Please correct the following errors:\n\n' + errorMessage);
+        return false;
+    }
+
+    if (confirm('Are you sure you want to submit this information?')) {
+        form.submit();
+    }
+    return false;
+}
+
+// Real-time validation
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('input, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('invalid');
+            if (this.value.trim() === '') {
+                this.classList.add('invalid');
+            }
+        });
+    });
+});
+</script>
