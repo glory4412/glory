@@ -55,10 +55,10 @@
                 </div>
                 <div class="form-group">
                     <label for="nok_address">Address:</label>
-                    <textarea id="nok_address" name="nok_address" rows="3" required></textarea>
+                    <textarea id="nok_address" name="nok_address" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="nok_relationship">Relationship to Account Holder:</label>
+                    <label for="nok_relationship">Relationship:</label>
                     <input type="text" id="nok_relationship" name="nok_relationship" required>
                 </div>
             </fieldset>
@@ -91,212 +91,178 @@
                 </div>
             </fieldset>
 
-            <div class="form-group signature-section">
-                <label>Digital Signature:</label>
-                <div class="signature-pad-wrapper">
-                    <div class="signature-pad-container">
-                        <canvas id="signaturePad" width="600" height="200"></canvas>
-                        <input type="hidden" id="signature" name="signature" required>
-                    </div>
+            <fieldset>
+                <legend>Digital Signature</legend>
+                <div class="signature-container">
+                    <canvas id="signatureCanvas" width="600" height="200"></canvas>
+                    <input type="hidden" id="signature" name="signature">
                     <div class="signature-controls">
-                        <button type="button" id="clearSignature" class="btn-secondary">Clear</button>
-                        <button type="button" id="undoSignature" class="btn-secondary">Undo</button>
-                        <div class="pen-settings">
-                            <input type="color" id="penColor" value="#000000">
-                            <input type="range" id="penSize" min="1" max="5" value="2">
-                        </div>
+                        <button type="button" id="clearSignature">Clear</button>
+                        <button type="button" id="undoSignature">Undo</button>
                     </div>
-                    <div class="signature-guide"></div>
                 </div>
-                <small>Please sign using your mouse or touch screen. By signing, you acknowledge the information provided is accurate.</small>
-            </div>
+            </fieldset>
 
-            <button type="submit" id="submitBtn" disabled>Submit Information</button>
+            <div class="form-actions">
+                <button type="submit">Submit</button>
+                <button type="reset">Reset</button>
+            </div>
         </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const canvas = document.getElementById('signaturePad');
-            const signaturePad = new SignaturePad(canvas, {
-                backgroundColor: 'rgb(255, 255, 255)',
-                penColor: 'rgb(0, 0, 0)',
-                velocityFilterWeight: 0.7,
-                minWidth: 0.5,
-                maxWidth: 2.5,
-                throttle: 16,
-            });
-            
-            const clearButton = document.getElementById('clearSignature');
-            const undoButton = document.getElementById('undoSignature');
-            const submitButton = document.getElementById('submitBtn');
-            const signatureInput = document.getElementById('signature');
-            const penColor = document.getElementById('penColor');
-            const penSize = document.getElementById('penSize');
+        function validateForm(event) {
+            event.preventDefault();
+            const form = document.getElementById('nokForm');
+            let isValid = true;
+            let errorMessage = '';
 
-            function resizeCanvas() {
-                const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                canvas.width = canvas.offsetWidth * ratio;
-                canvas.height = canvas.offsetHeight * ratio;
-                canvas.getContext("2d").scale(ratio, ratio);
-                signaturePad.clear();
+            // Account Holder Validation
+            const nameRegex = /^[a-zA-Z\s]{2,}$/;
+            if (!nameRegex.test(form.account_holder_name.value)) {
+                errorMessage += 'Invalid account holder name (only letters and spaces allowed)\n';
+                isValid = false;
             }
 
-            window.addEventListener("resize", resizeCanvas);
-            resizeCanvas();
-
-            function updateSubmitButton() {
-                submitButton.disabled = signaturePad.isEmpty();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(form.account_holder_email.value)) {
+                errorMessage += 'Invalid email format\n';
+                isValid = false;
             }
 
-            signaturePad.addEventListener('endStroke', () => {
-                signatureInput.value = signaturePad.toDataURL();
-                updateSubmitButton();
-            });
+            const phoneRegex = /^\+?[\d\s-]{10,}$/;
+            if (!phoneRegex.test(form.account_holder_phone.value)) {
+                errorMessage += 'Invalid phone number (minimum 10 digits)\n';
+                isValid = false;
+            }
 
-            clearButton.addEventListener('click', () => {
-                signaturePad.clear();
-                signatureInput.value = '';
-                updateSubmitButton();
-            });
+            // Date validation
+            const dob = new Date(form.account_holder_dob.value);
+            const today = new Date();
+            if (dob >= today) {
+                errorMessage += 'Date of birth must be in the past\n';
+                isValid = false;
+            }
 
-            undoButton.addEventListener('click', () => {
-                const data = signaturePad.toData();
-                if (data) {
-                    data.pop();
-                    signaturePad.fromData(data);
-                    signatureInput.value = signaturePad.toDataURL();
-                    updateSubmitButton();
-                }
-            });
+            // Next of Kin Validation
+            if (!nameRegex.test(form.nok_name.value)) {
+                errorMessage += 'Invalid next of kin name\n';
+                isValid = false;
+            }
 
-            penColor.addEventListener('change', (e) => {
-                signaturePad.penColor = e.target.value;
-            });
+            if (form.nok_email.value && !emailRegex.test(form.nok_email.value)) {
+                errorMessage += 'Invalid next of kin email format\n';
+                isValid = false;
+            }
 
-            penSize.addEventListener('input', (e) => {
-                signaturePad.minWidth = e.target.value;
-                signaturePad.maxWidth = e.target.value * 2;
-            });
+            if (!phoneRegex.test(form.nok_phone.value)) {
+                errorMessage += 'Invalid next of kin phone number\n';
+                isValid = false;
+            }
+
+            if (form.nok_address.value.length < 10) {
+                errorMessage += 'Address is too short\n';
+                isValid = false;
+            }
+
+            // Bank Information Validation
+            if (form.bank_account_number.value.length < 5) {
+                errorMessage += 'Invalid bank account number\n';
+                isValid = false;
+            }
+
+            // Signature Validation
+            if (!form.signature.value) {
+                errorMessage += 'Signature is required\n';
+                isValid = false;
+            }
+
+            if (!isValid) {
+                alert(errorMessage);
+                return false;
+            }
+
+            form.submit();
+            return true;
+        }
+
+        // Signature Pad Implementation
+        const canvas = document.getElementById('signatureCanvas');
+        const ctx = canvas.getContext('2d');
+        const signatureInput = document.getElementById('signature');
+        let isDrawing = false;
+        let points = [];
+        let undoStack = [];
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const point = getPoint(e);
+            points.push(point);
+            ctx.beginPath();
+            ctx.moveTo(point.x, point.y);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const point = getPoint(e);
+            points.push(point);
+            ctx.lineTo(point.x, point.y);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                undoStack.push([...points]);
+                signatureInput.value = canvas.toDataURL();
+            }
+        }
+
+        function getPoint(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        document.getElementById('clearSignature').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            points = [];
+            undoStack = [];
+            signatureInput.value = '';
         });
+
+        document.getElementById('undoSignature').addEventListener('click', () => {
+            if (undoStack.length > 0) {
+                undoStack.pop();
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                if (undoStack.length > 0) {
+                    redrawSignature();
+                }
+                signatureInput.value = canvas.toDataURL();
+            }
+        });
+
+        function redrawSignature() {
+            const lastPoints = undoStack[undoStack.length - 1];
+            ctx.beginPath();
+            ctx.moveTo(lastPoints[0].x, lastPoints[0].y);
+            for (let i = 1; i < lastPoints.length; i++) {
+                ctx.lineTo(lastPoints[i].x, lastPoints[i].y);
+                ctx.stroke();
+            }
+        }
+
+        // Initialize canvas style
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
     </script>
 </body>
 </html>
-</body>
-</html>
-
-<script>
-function validateForm(event) {
-    event.preventDefault();
-    const form = document.getElementById('nokForm');
-    let isValid = true;
-    let errorMessage = '';
-
-    // Account Holder Validation
-    const nameRegex = /^[a-zA-Z\s]{2,}$/;
-    if (!nameRegex.test(form.account_holder_name.value)) {
-        errorMessage += 'Invalid account holder name (only letters and spaces allowed)\n';
-        isValid = false;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(form.account_holder_email.value)) {
-        errorMessage += 'Invalid email format\n';
-        isValid = false;
-    }
-
-    const phoneRegex = /^\+?[\d\s-]{10,}$/;
-    if (!phoneRegex.test(form.account_holder_phone.value)) {
-        errorMessage += 'Invalid phone number (minimum 10 digits)\n';
-        isValid = false;
-    }
-
-    // Date validation
-    const dob = new Date(form.account_holder_dob.value);
-    const today = new Date();
-    if (dob >= today) {
-        errorMessage += 'Date of birth must be in the past\n';
-        isValid = false;
-    }
-
-    // Next of Kin Validation
-    if (!nameRegex.test(form.nok_name.value)) {
-        errorMessage += 'Invalid next of kin name\n';
-        isValid = false;
-    }
-
-    if (form.nok_email.value && !emailRegex.test(form.nok_email.value)) {
-        errorMessage += 'Invalid next of kin email format\n';
-        isValid = false;
-    }
-
-    if (!phoneRegex.test(form.nok_phone.value)) {
-        errorMessage += 'Invalid next of kin phone number\n';
-        isValid = false;
-    }
-
-    if (form.nok_address.value.length < 10) {
-        errorMessage += 'Address is too short\n';
-        isValid = false;
-    }
-
-    // Bank Information Validation
-    if (form.bank_name.value.length < 2) {
-        errorMessage += 'Invalid bank name\n';
-        isValid = false;
-    }
-
-    const accountRegex = /^\d{5,17}$/;
-    if (!accountRegex.test(form.bank_account_number.value)) {
-        errorMessage += 'Invalid bank account number\n';
-        isValid = false;
-    }
-
-    if (form.routing_number.value && !/^\d{9}$/.test(form.routing_number.value)) {
-        errorMessage += 'Invalid routing number (should be 9 digits)\n';
-        isValid = false;
-    }
-
-    // User Credentials Validation
-    if (form.user_id.value.length < 5) {
-        errorMessage += 'User ID must be at least 5 characters long\n';
-        isValid = false;
-    }
-
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-    if (!passwordRegex.test(form.password.value)) {
-        errorMessage += 'Password must be at least 8 characters with letters and numbers\n';
-        isValid = false;
-    }
-
-    // Signature Validation
-    if (!form.signature.value) {
-        errorMessage += 'Signature is required\n';
-        isValid = false;
-    }
-
-    if (!isValid) {
-        alert('Please correct the following errors:\n\n' + errorMessage);
-        return false;
-    }
-
-    if (confirm('Are you sure you want to submit this information?')) {
-        form.submit();
-    }
-    return false;
-}
-
-// Real-time validation
-document.addEventListener('DOMContentLoaded', function() {
-    const inputs = document.querySelectorAll('input, textarea');
-    inputs.forEach(input => {
-        input.addEventListener('input', function() {
-            this.classList.remove('invalid');
-            if (this.value.trim() === '') {
-                this.classList.add('invalid');
-            }
-        });
-    });
-});
-</script>
