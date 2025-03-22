@@ -90,11 +90,18 @@ button[type="submit"]:disabled {
     margin-top: 30px;
 }
 
+.signature-pad-wrapper {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
 .signature-pad-container {
-    border: 1px solid #ccc;
+    border: 1px solid #dee2e6;
     border-radius: 4px;
     margin: 10px 0;
     background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 #signaturePad {
@@ -104,7 +111,39 @@ button[type="submit"]:disabled {
 }
 
 .signature-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin: 10px 0;
+}
+
+.pen-settings {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.signature-guide {
+    border-top: 1px dashed #ccc;
+    margin-top: 160px;
+    position: relative;
+    top: -200px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+input[type="color"] {
+    width: 40px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+input[type="range"] {
+    width: 100px;
 }
 
 .btn-secondary {

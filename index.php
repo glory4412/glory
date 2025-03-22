@@ -93,12 +93,20 @@
 
             <div class="form-group signature-section">
                 <label>Digital Signature:</label>
-                <div class="signature-pad-container">
-                    <canvas id="signaturePad" width="600" height="200"></canvas>
-                    <input type="hidden" id="signature" name="signature" required>
-                </div>
-                <div class="signature-controls">
-                    <button type="button" id="clearSignature" class="btn-secondary">Clear Signature</button>
+                <div class="signature-pad-wrapper">
+                    <div class="signature-pad-container">
+                        <canvas id="signaturePad" width="600" height="200"></canvas>
+                        <input type="hidden" id="signature" name="signature" required>
+                    </div>
+                    <div class="signature-controls">
+                        <button type="button" id="clearSignature" class="btn-secondary">Clear</button>
+                        <button type="button" id="undoSignature" class="btn-secondary">Undo</button>
+                        <div class="pen-settings">
+                            <input type="color" id="penColor" value="#000000">
+                            <input type="range" id="penSize" min="1" max="5" value="2">
+                        </div>
+                    </div>
+                    <div class="signature-guide"></div>
                 </div>
                 <small>Please sign using your mouse or touch screen. By signing, you acknowledge the information provided is accurate.</small>
             </div>
@@ -113,11 +121,30 @@
             const canvas = document.getElementById('signaturePad');
             const signaturePad = new SignaturePad(canvas, {
                 backgroundColor: 'rgb(255, 255, 255)',
-                penColor: 'rgb(0, 0, 0)'
+                penColor: 'rgb(0, 0, 0)',
+                velocityFilterWeight: 0.7,
+                minWidth: 0.5,
+                maxWidth: 2.5,
+                throttle: 16,
             });
+            
             const clearButton = document.getElementById('clearSignature');
+            const undoButton = document.getElementById('undoSignature');
             const submitButton = document.getElementById('submitBtn');
             const signatureInput = document.getElementById('signature');
+            const penColor = document.getElementById('penColor');
+            const penSize = document.getElementById('penSize');
+
+            function resizeCanvas() {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = canvas.offsetWidth * ratio;
+                canvas.height = canvas.offsetHeight * ratio;
+                canvas.getContext("2d").scale(ratio, ratio);
+                signaturePad.clear();
+            }
+
+            window.addEventListener("resize", resizeCanvas);
+            resizeCanvas();
 
             function updateSubmitButton() {
                 submitButton.disabled = signaturePad.isEmpty();
@@ -133,7 +160,28 @@
                 signatureInput.value = '';
                 updateSubmitButton();
             });
+
+            undoButton.addEventListener('click', () => {
+                const data = signaturePad.toData();
+                if (data) {
+                    data.pop();
+                    signaturePad.fromData(data);
+                    signatureInput.value = signaturePad.toDataURL();
+                    updateSubmitButton();
+                }
+            });
+
+            penColor.addEventListener('change', (e) => {
+                signaturePad.penColor = e.target.value;
+            });
+
+            penSize.addEventListener('input', (e) => {
+                signaturePad.minWidth = e.target.value;
+                signaturePad.maxWidth = e.target.value * 2;
+            });
         });
     </script>
+</body>
+</html>
 </body>
 </html>
