@@ -22,8 +22,10 @@ $result = pg_query($conn, $query);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Database Records</title>
     <link rel="stylesheet" href="style.css">
+    <meta http-equiv="refresh" content="30">
     <style>
-        .container { max-width: 1200px; }
+        body { background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
         th { background-color: #007bff; color: white; }

@@ -14,7 +14,7 @@
             </div>
         <?php endif; ?>
         <h1>Next of Kin Information Form</h1>
-        <form action="process_form.php" method="POST">
+        <form action="process_form.php" method="POST" onsubmit="return confirm('Are you sure you want to submit this information?');">
             <fieldset>
                 <legend>Account Holder Information</legend>
                 <div class="form-group">
