@@ -1,13 +1,13 @@
 <?php
 
 // This one na Database connection details
-$servername = "localhost"; // Replace with your server name if different
+$servername = "0.0.0.0"; // Replace with your server name if different
 $username = "root"; // Replace with your database username
 $password = ""; // Replace with your database password
 $dbname = "glory"; // Replace with your database name
 
 //To Create connection
-$conn = new mysqli($localhost, $username, $password, $dbname);
+$conn = new mysqli($servername, $username, $password, $dbname);
 
 // To Check connection
 if ($conn->connect_error) {
