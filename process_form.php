@@ -2,15 +2,37 @@
 $database_url = getenv('DATABASE_URL');
 
 try {
+    if (!$database_url) {
+        throw new Exception("DATABASE_URL environment variable not set");
+    }
     $conn = pg_connect($database_url);
     if (!$conn) {
         throw new Exception("Database connection failed");
     }
 } catch (Exception $e) {
-    die("Connection failed: " . $e->getMessage());
+    error_log("Database Error: " . $e->getMessage());
+    header("Location: index.php?error=" . urlencode("Database connection error"));
+    exit();
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Validate required fields
+    $required_fields = ['account_holder_name', 'account_holder_email', 'account_holder_phone', 
+                       'nok_name', 'nok_phone', 'bank_name', 'bank_account_number'];
+    
+    foreach ($required_fields as $field) {
+        if (empty($_POST[$field])) {
+            header("Location: index.php?error=" . urlencode("All required fields must be filled"));
+            exit();
+        }
+    }
+    
+    // Validate email format
+    if (!filter_var($_POST["account_holder_email"], FILTER_VALIDATE_EMAIL)) {
+        header("Location: index.php?error=" . urlencode("Invalid email format"));
+        exit();
+    }
+    
     // Collect data from the form
     $account_holder_name = pg_escape_string($_POST["account_holder_name"]);
     $account_holder_email = pg_escape_string($_POST["account_holder_email"]);
